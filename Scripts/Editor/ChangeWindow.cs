@@ -1,6 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using AllMonoChanger.Scripts.Runtime;
+using PlasticGui.WorkspaceWindow.Merge;
 using UnityEditor;
+using UnityEngine;
 
 namespace AllMonoChanger.Scripts.Editor
 {
@@ -13,31 +18,47 @@ namespace AllMonoChanger.Scripts.Editor
         [MenuItem("Window/ChangeWindow")]
         public static void ShowWindow()
         {
-            //既存のウィンドウのインスタンスを表示。ない場合は作成します。
-            EditorWindow.GetWindow(typeof(ChangeWindow));
+            GetWindow(typeof(ChangeWindow));
         }
+
         
+        private ChangeTypesData[] _cachedTypesData;
+        private void OnEnable()
+        {
+            _cachedTypesData = GetTypesData().ToArray();
+        }
+
         private void OnGUI()
         {
-            var type = typeof(MonoTestTarget);
-            var allSerializedObject = ChangeHelper.GetAllComponent(type).Select(c => new SerializedObject(c));
+            //_cachedTypesDataを使ってボタンを配置する。配置したボタンを押した場合は、変更を適用する。
+
             var isChanged = false;
-            using (var changed = new EditorGUI.ChangeCheckScope())
+        }
+
+
+        private static IEnumerable<ChangeTypesData> GetTypesData()
+        {
+            var typeCollection = TypeCache.GetTypesWithAttribute<ChangerTargetAttribute>();
+            foreach (var type in typeCollection)
             {
-                foreach (var serializedObject in allSerializedObject)
-                {
-                    serializedObject.Update();
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_testValue"));
-                    serializedObject.ApplyModifiedPropertiesWithoutUndo();
-                }
+                var typeInfo = type.GetTypeInfo();
+                var attribute =
+                    typeInfo.GetCustomAttributes().Where(a => a.GetType() == typeof(ChangerTargetAttribute)).First() as
+                        ChangerTargetAttribute;
 
-                if (changed.changed)
+                if (attribute == null)
                 {
-                    AssetDatabase.SaveAssets();
+                    Debug.LogWarning(type.Name + "にはChangerTarget属性が定義されていません");
+                    continue;
                 }
+                yield return new ChangeTypesData() { ChangerType = type, TargetType = attribute.TargetType };
             }
+        }
 
-            
+        private class ChangeTypesData
+        {
+            public Type ChangerType;
+            public Type TargetType;
         }
     }
 }
