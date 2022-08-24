@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using PlasticGui;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,7 +17,10 @@ namespace AllMonoChanger.Scripts.Editor
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
                 var gameObject = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                yield return gameObject.GetComponentInChildren(componentType, true);
+                foreach(var component in gameObject.GetComponentsInChildren(componentType, true))
+                {
+                    yield return component;
+                }
             }
         }
 

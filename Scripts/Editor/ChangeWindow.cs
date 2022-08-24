@@ -1,5 +1,6 @@
+using System.Linq;
+using AllMonoChanger.Scripts.Runtime;
 using UnityEditor;
-using UnityEngine;
 
 namespace AllMonoChanger.Scripts.Editor
 {
@@ -8,6 +9,35 @@ namespace AllMonoChanger.Scripts.Editor
     /// </summary>
     public class ChangeWindow : EditorWindow
     {
-        public void GetChangeFiled(){}
+        
+        [MenuItem("Window/ChangeWindow")]
+        public static void ShowWindow()
+        {
+            //既存のウィンドウのインスタンスを表示。ない場合は作成します。
+            EditorWindow.GetWindow(typeof(ChangeWindow));
+        }
+        
+        private void OnGUI()
+        {
+            var type = typeof(MonoTestTarget);
+            var allSerializedObject = ChangeHelper.GetAllComponent(type).Select(c => new SerializedObject(c));
+            var isChanged = false;
+            using (var changed = new EditorGUI.ChangeCheckScope())
+            {
+                foreach (var serializedObject in allSerializedObject)
+                {
+                    serializedObject.Update();
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_testValue"));
+                    serializedObject.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                if (changed.changed)
+                {
+                    AssetDatabase.SaveAssets();
+                }
+            }
+
+            
+        }
     }
 }

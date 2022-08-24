@@ -1,7 +1,9 @@
 {
     "name": "AllMonoChanger.Editor",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:fec885c759de3d7449d2a3c843224a64"
+    ],
     "includePlatforms": [
         "Editor"
     ],
