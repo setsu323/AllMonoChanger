@@ -29,9 +29,32 @@ namespace AllMonoChanger.Scripts.Editor
 
         private void OnGUI()
         {
-            //_cachedTypesDataを使ってボタンを配置する。配置したボタンを押した場合は、変更を適用する。
-
             var isChanged = false;
+            foreach (var changeTypesData in _cachedTypesData)
+            {
+                if (GUILayout.Button(changeTypesData.ChangerType.Name))
+                {
+                    isChanged = true;
+                    Change(changeTypesData);
+                }
+            }
+
+            if (isChanged)
+            {
+                AssetDatabase.SaveAssets();
+            }
+        }
+
+        private void Change(ChangeTypesData changeTypesData)
+        {
+            var allComponent = ChangeHelper.GetAllComponent(changeTypesData.TargetType);
+            var instance = changeTypesData.ChangerType.GetConstructor(Type.EmptyTypes).Invoke(null);
+            var method = changeTypesData.ChangerType.GetMethod("Change");
+            foreach (var component in allComponent)
+            {
+                var serializedObject = new SerializedObject(component);
+                method.Invoke(instance, new[] { serializedObject });
+            }
         }
 
 
