@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace AllMonoChanger.Scripts.Runtime
 {
+    [AttributeUsage(AttributeTargets.Class)]
     public class ChangerTargetAttribute : Attribute
     {
         public Type TargetType { get; private set; }
