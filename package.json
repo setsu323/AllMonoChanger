@@ -1,9 +1,9 @@
 {
-  "name": "com.revertan3.allMonoChanger",
+  "name": "com.revertan3.all-mono-changer",
   "version": "1.0.0",
   "displayName": "AllMonoChanger",
   "description": "You can change all component and scriptableObject",
-  "unity": "2021.3.7f1",
+  "unity": "2021.3",
   "author": {
     "name": "Revertan3",
     "url": "https://twitter.com/revertan3"
