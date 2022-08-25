@@ -11,7 +11,7 @@ namespace AllMonoChanger.Scripts.Runtime
     public class TestChanger
     {
         [ChangerTarget()]
-        public static void Change(MonoTestTarget testTarget)
+        public static void Change(TestTarget testTarget)
         {
             var serializedObject = new SerializedObject(testTarget);
             serializedObject.Update();

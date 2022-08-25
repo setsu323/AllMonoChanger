@@ -49,9 +49,21 @@ namespace AllMonoChanger.Scripts.Editor
             }
         }
 
-        private void Change(ChangeTypesData changeTypesData)
+        private static void Change(ChangeTypesData changeTypesData)
         {
-            var allComponent = ChangeHelper.GetAllComponent(changeTypesData.TargetType);
+            IEnumerable<object> allComponent;
+            if (changeTypesData.TargetType.IsSubclassOf(typeof(Component)))
+            {
+                allComponent = ChangeHelper.GetAllComponent(changeTypesData.TargetType);
+            }
+            else if(changeTypesData.TargetType.IsSubclassOf(typeof(ScriptableObject)))
+            {
+                allComponent = ChangeHelper.GetAllScriptableObject(changeTypesData.TargetType);
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException();
+            }
             foreach (var component in allComponent)
             {
                 changeTypesData.MethodInfo.Invoke(null, new[] { component });
