@@ -32,7 +32,11 @@ namespace AllMonoChanger.Scripts.Editor
             var isChanged = false;
             foreach (var changeTypesData in _cachedTypesData)
             {
-                if (GUILayout.Button(changeTypesData.MethodInfo.Name))
+                var overrideName = changeTypesData.Attribute.OverrideMethodMessage;
+                var methodName = changeTypesData.MethodInfo.Name;
+                var buttonName = overrideName == "" ? methodName : overrideName;
+                
+                if (GUILayout.Button(buttonName))
                 {
                     isChanged = true;
                     Change(changeTypesData);
@@ -50,7 +54,6 @@ namespace AllMonoChanger.Scripts.Editor
             var allComponent = ChangeHelper.GetAllComponent(changeTypesData.TargetType);
             foreach (var component in allComponent)
             {
-                var serializedObject = new SerializedObject(component);
                 changeTypesData.MethodInfo.Invoke(null, new[] { component });
             }
         }
@@ -63,24 +66,28 @@ namespace AllMonoChanger.Scripts.Editor
             {
                 if (!methodInfo.IsStatic)
                 {
-                    Debug.LogWarning("ChangerTarget関数はstaticの必要があります");
+                    Debug.LogWarning("ChangerTarget関数はstaticの必要があります" + methodInfo.Name);
                     continue;
                 }
 
                 var parameters = methodInfo.GetParameters();
                 if (parameters.Length != 1)
                 {
-                    Debug.LogWarning("AllMonoChangerはひとつの引数にしか対応していません");
+                    Debug.LogWarning("AllMonoChangerはひとつの引数にしか対応していません" + methodInfo.Name);
                     continue;
                 }
 
                 var targetType = parameters[0].ParameterType;
-                yield return new ChangeTypesData() { MethodInfo = methodInfo, TargetType = targetType };
+                var changerTargetAttribute = methodInfo.GetCustomAttribute<ChangerTargetAttribute>();
+
+                yield return new ChangeTypesData()
+                    { MethodInfo = methodInfo, TargetType = targetType, Attribute = changerTargetAttribute };
             }
         }
 
         private class ChangeTypesData
         {
+            public ChangerTargetAttribute Attribute;
             public MethodInfo MethodInfo;
             public Type TargetType;
         }
