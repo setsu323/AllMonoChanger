@@ -10,7 +10,7 @@ namespace AllMonoChanger.Scripts.Runtime
     
     public class TestChanger
     {
-        [ChangerTarget(typeof(MonoTestTarget))]
+        [ChangerTarget()]
         public static void Change(MonoTestTarget testTarget)
         {
             var serializedObject = new SerializedObject(testTarget);
