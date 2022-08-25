@@ -7,12 +7,13 @@ namespace AllMonoChanger.Scripts.Runtime
     {
         [SerializeField] private int _testValue;
     }
-
-    [ChangerTarget(typeof(MonoTestTarget))]
-    public class TestChanger : BaseAllChanger
+    
+    public class TestChanger
     {
-        public override void Change(SerializedObject serializedObject)
+        [ChangerTarget(typeof(MonoTestTarget))]
+        public static void Change(MonoTestTarget testTarget)
         {
+            var serializedObject = new SerializedObject(testTarget);
             serializedObject.Update();
             var testValueProp = serializedObject.FindProperty("_testValue");
             testValueProp.intValue *= 2;

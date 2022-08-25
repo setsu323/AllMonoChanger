@@ -32,7 +32,7 @@ namespace AllMonoChanger.Scripts.Editor
             var isChanged = false;
             foreach (var changeTypesData in _cachedTypesData)
             {
-                if (GUILayout.Button(changeTypesData.ChangerType.Name))
+                if (GUILayout.Button(changeTypesData.MethodInfo.Name))
                 {
                     isChanged = true;
                     Change(changeTypesData);
@@ -48,38 +48,40 @@ namespace AllMonoChanger.Scripts.Editor
         private void Change(ChangeTypesData changeTypesData)
         {
             var allComponent = ChangeHelper.GetAllComponent(changeTypesData.TargetType);
-            var instance = changeTypesData.ChangerType.GetConstructor(Type.EmptyTypes).Invoke(null);
-            var method = changeTypesData.ChangerType.GetMethod("Change");
             foreach (var component in allComponent)
             {
                 var serializedObject = new SerializedObject(component);
-                method.Invoke(instance, new[] { serializedObject });
+                changeTypesData.MethodInfo.Invoke(null, new[] { component });
             }
         }
 
 
         private static IEnumerable<ChangeTypesData> GetTypesData()
         {
-            var typeCollection = TypeCache.GetTypesWithAttribute<ChangerTargetAttribute>();
-            foreach (var type in typeCollection)
+            var methodCollection = TypeCache.GetMethodsWithAttribute<ChangerTargetAttribute>();
+            foreach (var methodInfo in methodCollection)
             {
-                var typeInfo = type.GetTypeInfo();
-                var attribute =
-                    typeInfo.GetCustomAttributes().Where(a => a.GetType() == typeof(ChangerTargetAttribute)).First() as
-                        ChangerTargetAttribute;
-
-                if (attribute == null)
+                if (!methodInfo.IsStatic)
                 {
-                    Debug.LogWarning(type.Name + "にはChangerTarget属性が定義されていません");
+                    Debug.LogWarning("ChangerTarget関数はstaticの必要があります");
                     continue;
                 }
-                yield return new ChangeTypesData() { ChangerType = type, TargetType = attribute.TargetType };
+
+                var parameters = methodInfo.GetParameters();
+                if (parameters.Length != 1)
+                {
+                    Debug.LogWarning("AllMonoChangerはひとつの引数にしか対応していません");
+                    continue;
+                }
+
+                var targetType = parameters[0].ParameterType;
+                yield return new ChangeTypesData() { MethodInfo = methodInfo, TargetType = targetType };
             }
         }
 
         private class ChangeTypesData
         {
-            public Type ChangerType;
+            public MethodInfo MethodInfo;
             public Type TargetType;
         }
     }
