@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AllMonoChanger.Runtime;
+using Assets.AllMonoChanger.Runtime;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace AllMonoChanger.Editor
 {
@@ -51,7 +52,7 @@ namespace AllMonoChanger.Editor
 
         private static void Change(ChangeTypesData changeTypesData)
         {
-            IEnumerable<object> allComponent;
+            IEnumerable<Object> allComponent;
             if (changeTypesData.TargetType.IsSubclassOf(typeof(Component)))
             {
                 allComponent = ChangeHelper.GetAllComponent(changeTypesData.TargetType);
@@ -66,7 +67,11 @@ namespace AllMonoChanger.Editor
             }
             foreach (var component in allComponent)
             {
-                changeTypesData.MethodInfo.Invoke(null, new[] { component });
+                changeTypesData.MethodInfo.Invoke(null, new object[] { component });
+                if (changeTypesData.UseSetDirty)
+                {
+                    EditorUtility.SetDirty(component);
+                }
             }
         }
 
@@ -93,7 +98,7 @@ namespace AllMonoChanger.Editor
                 var changerTargetAttribute = methodInfo.GetCustomAttribute<ChangerTargetAttribute>();
 
                 yield return new ChangeTypesData()
-                    { MethodInfo = methodInfo, TargetType = targetType, Attribute = changerTargetAttribute };
+                    { MethodInfo = methodInfo, TargetType = targetType, Attribute = changerTargetAttribute,UseSetDirty = !changerTargetAttribute.DisableSetDirty};
             }
         }
 
@@ -102,6 +107,7 @@ namespace AllMonoChanger.Editor
             public ChangerTargetAttribute Attribute;
             public MethodInfo MethodInfo;
             public Type TargetType;
+            public bool UseSetDirty;
         }
     }
 }
