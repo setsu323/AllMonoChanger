@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AllMonoChanger.Scripts.Runtime;
+using AllMonoChanger.Runtime;
 using UnityEditor;
 using UnityEngine;
 
-namespace AllMonoChanger.Scripts.Editor
+namespace AllMonoChanger.Editor
 {
     /// <summary>
     /// 全てのPrefabの中から、特定の手順で値を上書きするための機能。

@@ -1,6 +1,6 @@
 using System;
 
-namespace AllMonoChanger.Scripts.Runtime
+namespace AllMonoChanger.Runtime
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class ChangerTargetAttribute : Attribute
